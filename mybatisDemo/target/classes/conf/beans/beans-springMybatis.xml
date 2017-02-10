@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/tx/spring-aop-3.0.xsd">
+	<!-- 扫描注解 -->
+	<context:annotation-config />
+	<context:component-scan base-package="springMybatis" />
+
+	<bean id="springMybatisDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+
+		<!-- <property name="url" value="jdbc:log4jdbc：mysql://localhost:3306/test?characterEncoding=UTF-8"/> 
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" /> -->
+		<property name="url"
+			value="jdbc:log4jdbc:mysql://localhost:3306/test?characterEncoding=UTF-8" />
+		<property name="driverClassName" value="net.sf.log4jdbc.DriverSpy" />
+		<property name="username" value="root" />
+		<property name="password" value="hillstone" />
+		<property name="maxActive" value="10000" /> <!-- 连接池最大的活动连接数 -->
+		<property name="maxIdle" value="10" />    <!-- 最大的可空闲的连接数 -->
+		<property name="maxWait" value="500" />   <!-- 最大可以等待的连接数 -->
+
+		<property name="timeBetweenEvictionRunsMillis" value="300000" />
+		<property name="minEvictableIdleTimeMillis" value="180000" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="3600" />
+		<property name="logAbandoned" value="true" />
+
+		<property name="defaultAutoCommit" value="true" />  <!-- 这里没有涉及到事务，每执行一个数据库，就自动提交，所以设置为true，否则应为false -->
+	</bean>
+
+	<!-- TransactionManager 事务管理器 -->
+	<bean id="test1TransactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="springMybatisDataSource" />
+	</bean>
+	<!-- 声明式事务 -->
+	<tx:annotation-driven transaction-manager="test1TransactionManager" />
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="conf/configuration.xml"></property>
+		<property name="dataSource" ref="springMybatisDataSource" />
+	</bean>
+	<bean id="xxx" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="springMybatis.mapper.UserMapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<bean id="yyy" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="springMybatis.mapper.AccountMapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+</beans>
